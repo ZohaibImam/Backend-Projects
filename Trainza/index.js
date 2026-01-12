@@ -1,34 +1,12 @@
 const express = require("express");
+const {userRouter} = require("./routes/user");
+const {courseRouter} = require("./routes/course");
+
+app.use("/user", userRouter);
+app.use("/course", courseRouter);
 
 const app = express();
 const port = 3000;
-
-
-//Signup End Point
-app.get("/user/signup", (req,res)=>{
-    
-})
-
-//Signin End Point
-app.post("/user/signin", (req,res)=>{
-    
-})
-
-//Users Purchased Courses End Point
-app.get("/user/purchases", (req,res)=>{
-    
-})
-
-//User Wants to Purchase a course End Point
-app.post("/course/purchase", (req,res)=>{
-    
-})
-
-//All Courses End Point
-app.get("/courses", (req,res)=>{
-    
-})
-
 
 express.listen(port, ()=>{
     console.log(`App is listening to port ${port}`);
