@@ -7,13 +7,13 @@ userRouter.post("/signup", (req,res)=>{
     
 })
 
-//Users Purchased Courses End Point
-userRouter.get("/purchases", (req,res)=>{
+//Signin End Point
+userRouter.post("/signin", (req,res)=>{
     
 })
 
-//Signin End Point
-userRouter.post("/signin", (req,res)=>{
+//Users Purchased Courses End Point
+userRouter.get("/purchases", (req,res)=>{
     
 })
 

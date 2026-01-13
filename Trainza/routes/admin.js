@@ -1,0 +1,34 @@
+const { Router } = require("express");
+
+const adminRouter = Router();
+
+//Signup End Point of Admin
+adminRouter.post("/signup", (req,res)=>{
+    
+})
+
+//Signin End Point of Admin
+adminRouter.post("/signin", (req,res)=>{
+    
+})
+
+//Course Creation End Point by Admin
+adminRouter.post("/course", (req,res)=>{
+    
+})
+
+//Course Updation End Point by Admin
+adminRouter.put("/course", (req,res)=>{
+    
+})
+
+//To get all the Course Created End Point by Admin
+adminRouter.get("/course", (req,res)=>{
+    
+})
+
+module.exports = {
+    adminRouter : adminRouter
+}
+
+
