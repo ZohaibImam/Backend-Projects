@@ -2,8 +2,8 @@ const express = require("express");
 const {userRouter} = require("./routes/user");
 const {courseRouter} = require("./routes/course");
 
-app.use("/user", userRouter);
-app.use("/course", courseRouter);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/course", courseRouter);
 
 const app = express();
 const port = 3000;
