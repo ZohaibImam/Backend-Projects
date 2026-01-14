@@ -14,17 +14,17 @@ adminRouter.post("/signin", (req,res)=>{
 })
 
 //Course Creation End Point by Admin
-adminRouter.post("/course", (req,res)=>{
+adminRouter.post("/", (req,res)=>{
     
 })
 
 //Course Updation End Point by Admin
-adminRouter.put("/course", (req,res)=>{
+adminRouter.put("/", (req,res)=>{
     
 })
 
 //To get all the Course Created End Point by Admin
-adminRouter.get("/course", (req,res)=>{
+adminRouter.get("/bulk", (req,res)=>{
     
 })
 
