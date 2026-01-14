@@ -11,7 +11,12 @@ app.use("/api/v1/course", courseRouter);
 
 const port = 3000;
 
-app.listen(port, ()=>{
-    console.log(`App is listening to port ${port}`);
-})
+async function main() {
+    console.log("Connecting to MongoDB...");
+    await mongoose.connect("mongodb+srv://zaid_imam_db:Bamboo123@cluster0.pu7qzah.mongodb.net/trainza-app");
+    app.listen(3000);
+    console.log("listening on port 3000")
+}
+
+main()
 
