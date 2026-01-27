@@ -59,7 +59,7 @@ userRouter.post("/signup", async (req,res)=>{
     })
 })
 
-//Signin End Point
+//Dedined a POST route for user signIn
 userRouter.post("/signin", async (req,res)=>{
     //Defined the schema for validating the request body data using zod
     const requireBody = zod.object({
