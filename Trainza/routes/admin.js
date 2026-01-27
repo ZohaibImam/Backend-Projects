@@ -1,11 +1,23 @@
+//Imprted the router object from the express module to create route handler
 const { Router } = require("express");
+
+//Created a new instance of router for defining user related routes
+const adminRouter = Router();
+
+//Imported the userModel, purchaseModel and courseModel from the database folder to interact with user, purchase and course details
 const { adminModel, courseModel } = require("../db");
+
+//Imported adminMiddleware to authenticate and authorize admins before allowing access to routes
+const { adminMiddleware } = require("../middleware/admin");
+
+//Impoted the JWT admin secret from the configuration file for signing JWT tokens
+const {JWT_ADMIN_PASSWORD} = require("../config");
+
+//Imported necessary modules for handeling JWT authentication, password hashing and schema validation
 const jwt = require("jsonwebtoken");
-const JWT_ADMIN_PASSWORD = "admin@12Secret";
 const zod = require("zod");
 const bcrypt = require("bcrypt");
 
-const adminRouter = Router();
 
 //Defined a POST route for admin signUp
 adminRouter.post("/signup", async (req,res)=>{
@@ -115,46 +127,112 @@ adminRouter.post("/signin", async (req,res)=>{
     }
 });
 
-//Course Creation End Point by Admin
-adminRouter.post("/", async (req,res)=>{
+//Defined the admin routes for creating the course
+adminRouter.post("/", adminMiddleware,async (req,res)=>{
+    //Get the adminId from the request object 
     const adminId = req.adminId;
+
+    //Validated the request body data using the zod schema (title, description, imageUrl, price must be valid)
+    const requireBody = zod.object({
+        title : zod.string().min(3), //Title must be atleast 3 characters
+        description : zod.string().min(10), //Description atleast 10 characters
+        imageUrl : zod.string().url(), //Image url must be valid URL format
+        price : zod.number().positive(), //Price must be a valid positive number
+    });
+
+    //Parsed and validated the request body data
+    const parseDataWithSuccess = requireBody.safeParse(req.body);
+
+    //If the data format is incorrect, sending an error message to the admin
+    if (!parseDataWithSuccess.success){
+        return res.json({
+            message : "Incorrect Data Format",
+            errors : parseDataWithSuccess.error, 
+        });
+    }
+
+    //Get title, description, imageUrl and price from the request body
     const { title, description, imageUrl, price, courseId } = req.body;
 
+    //Created a new course with the given title, description, imageUrl, price and creatorId
     const course = await courseModel.create({
         title: title, 
         description: description, 
         imageUrl: imageUrl, 
         price: price, 
         creatorId: adminId
-    })
-    res.json({
-        message: "Course created",
+    });
+
+    //Responded with the success message if the course is created successfully
+    res.status(201).json({
+        message: "Course created!",
         courseId: course._id
-    })
+    });
 
+});
 
-})
-
-//Course Updation End Point by Admin
-adminRouter.put("/", async (req,res)=>{
+//Defined an admin route for updating a course 
+adminRouter.put("/", adminMiddleware, async (req,res)=>{
+    //Get the adminId from the request object 
     const adminId = req.adminId;
-    const { title, description, imageUrl, price, courseId } = req.body;
 
-    const course = await courseModel.updateOne({
-        _id: courseId, 
-        creatorId: adminId 
-    }, {
-        title: title, 
-        description: description, 
-        imageUrl: imageUrl, 
-        price: price
-    })
+    //Designed a schema using zod to validate the request body for updating a course
+        const requireBody = zod.object({
+            courseId : zod.string().min(5), //Ensures course id is atleast 5 characters long 
+            title : zod.string().min(3).optional(), //Title must be atleast 3 characters and it is optional
+            description : zod.string().min(10).optional(), //Description atleast 10 characters and it is optional
+            imageUrl : zod.string().url().min(5).optional(), //Image url must be valid URL format and it is optional
+            price : zod.number().positive().optional(), //Price is optional
+        });
 
-    res.json({
-        message: "Course updated",
-        courseId: course._id
-    })
-})
+        // Parse and validate the incoming request body against the schema
+        const parseDataWithSuccess = requireBody.safeParse(req.body);
+
+        // If validation fails, responded with an error message and the details of the error
+        if (!parseDataWithSuccess.success) {
+            return res.json({
+                message: "Incorrect data format", // Informed the admin about the error
+                error: parseDataWithSuccess.error, // Provided specific validation error details
+            });
+        }
+
+    // Destructured the validated fields from the request body
+    const { courseId, title, description, imageUrl, price } = req.body;
+
+    // Attempted to find the course in the database using the provided courseId and adminId
+    const course = await courseModel.findOne({
+        _id: courseId, // Match the course by ID
+        creatorId: adminId, // Ensure the admin is the creator
+    });
+
+    // If the course is not found, responded with an error message
+    if (!course) {
+        return res.status(404).json({
+            message: "Course not found!", // Inform the client that the specified course does not exist
+        });
+    }
+
+    // Updated the course details in the database using the updates object
+    await courseModel.updateOne(
+        {
+            _id: courseId, // Matched the course by ID
+            creatorId: adminId, // Ensured the admin is the creator
+        },
+
+        { 
+            title: title || course.title, // Updated title if provided, otherwise kept the existing title
+            description: description || course.description, // Updated description if provided, otherwise kept the existing description
+            imageUrl: imageUrl || course.imageUrl, // Updated imageUrl if provided, otherwise kept the existing imageUrl
+            price: price || course.price, // Updated price if provided, otherwise kept the existing price
+         } 
+    );
+
+    // Responded with a success message upon successful course updatation
+    res.status(200).json({
+        message: "Course updated!", // Confirms successful course update
+    });
+});
+
 
 //To get all the Course Created End Point by Admin
 adminRouter.get("/bulk", async (req,res)=>{

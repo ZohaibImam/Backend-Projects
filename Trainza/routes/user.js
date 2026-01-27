@@ -1,11 +1,24 @@
+//Imprted the router object from the express module to create route handler
 const {Router} = require("express");
+
+//Created a new instance of router for defining user related routes
+const userRouter = Router(); 
+
+//Imported the userModel, purchaseModel and courseModel from the database folder to interact with user, purchase and course details
 const { userModel, purchaseModel, courseModel } = require("../db");
+
+//Imported userMiddleware to authenticate and authorize users before allowing access to routes
+const { userMiddleware } = require("../middleware/user");
+
+//Impoted the JWT user secret from the configuration file for signing JWT tokens
+const {JWT_USER_PASSWORD} = require("../config");
+
+//Imported necessary modules for handeling JWT authentication, password hashing and schema validation
 const jwt = require("jsonwebtoken");
-const JWT_USER_PASSWORD = "Zaid123@45"
 const zod = require("zod");
 const bcrypt = require("bcrypt");
 
-const userRouter = Router(); //Router is a place that will handle incoming request
+
 
 //Defined a POST route for user signUp
 userRouter.post("/signup", async (req,res)=>{
