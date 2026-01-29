@@ -248,6 +248,75 @@ adminRouter.get("/bulk", async (req,res)=>{
     })
 })
 
+//Defined the admin routes for deleting the courses
+adminRouter.delete("/course", adminMiddleware, async (req,res) => {
+    //Get the adminId from the request object 
+    const adminId = req.adminId;
+
+    //Validating the request body data using zod schema (courseId must be valid)
+    const requireBody = zod.object({
+        courseId : zod.string().min(5), //CourseId must be atleast 5 characters
+    })
+
+    //Parsed and validated the request body data
+    const parseDataWithSuccess = require.body.safeParse(req.body);
+
+    //If the data format is incorrect, sending an error message to the client
+    if(!parseDataWithSuccess.success){
+        return res.json({
+            message : "Incorrect Data Format", 
+            error : parseDataWithSuccess.error,
+        });
+    }
+
+    //Get courseId from the request body
+    const {courseId} = req.body;
+
+    //Finding the course with the given courseId and creatorId 
+    const course = await courseModel.findOne({
+        _id : courseId,
+        creatorId : adminId,
+    })
+
+    //If the course is not found, send an error message to the client
+    if(!course){
+        return res.status(404).json({
+            message : "Course not found",
+        })
+    }
+
+    //Deleting the course with the given courseId and creatorId
+    await courseModel.deleteOne({
+        _id : courseId,
+        creatorId : adminId,
+    })
+
+    //Responded with the success message if the course is deleted successfully
+    res.status(200).json({
+        message : "Course deleted successfully!"
+    })
+
+});
+
+//Defined the admin routes for getting all the courses 
+
+adminRouter.get("/courses", adminMiddleware, async (req,res)=>{
+    //Getting the adminId from the request object 
+    const adminId = req.adminId;
+
+    //Finding all the courses with the given creatorId 
+    const courses = await courseModel.find({
+        creatorId : adminId,
+    })
+
+    //Responded with the course if they are found successfully
+    res.status(200).json({
+        courses : courses,
+    })
+
+});
+
+//Exported tyhe admin router so that it can used in otyher files
 module.exports = {
     adminRouter : adminRouter
 }
